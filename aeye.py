@@ -42,6 +42,7 @@ def evaluate(X,y,model,batch_size, accuracy_operation, X_ph, Y_ph, keep_p_ph, sa
     return (total_accuracy/total_eval)
 
 def initialize(model,saver):
+    with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         saver.save(sess, model)
 
