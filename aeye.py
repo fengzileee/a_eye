@@ -1,3 +1,4 @@
+import matplotlib.image as mimg
 import cv2
 import tensorflow as tf
 from tensorflow.contrib.layers import flatten
@@ -120,3 +121,15 @@ def parse_txt(filename):
             X_adr.append(splited[0])
             Y.append(splited[1])
     return X_adr, Y
+
+def load_image(files_adr):
+    """ 
+    Takes a list of addresses given in the text file in split directory
+    Return a list of numpy arrays, each representing one imega
+    """
+    ret = []
+    for adr in files_adr:
+        im = mimg.imread('./BreaKHis_data/' + adr)
+        ret.append(im)
+    return ret
+
