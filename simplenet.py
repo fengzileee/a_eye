@@ -122,15 +122,5 @@ def network(X, keep_probability):
     fullo = tf.add(tf.matmul(full2, fullo_w), fullo_b)
     logits = tf.nn.relu(fullo)
     
-  
-    # full 2, final
-    full2_w = tf.Variable(tf.truncated_normal(shape = (full1_out,2), 
-                                             mean = mu, stddev = sigma), 
-                          name = 'full2_w')
-    full2_b = tf.Variable(tf.zeros(2), 
-                         name = 'full2_b')
-    
-    full2 = tf.add(tf.matmul(full1, full2_w), full2_b)
-    logits = tf.nn.relu(full2)
-    
+   
     return logits

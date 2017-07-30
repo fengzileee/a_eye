@@ -27,8 +27,7 @@ def preproctf(data_set):
     pro_data_set = np.reshape(pro_data_set,(len(pro_data_set),350,230,1))
     return pro_data_set
 
-def evaluate(X,y,model,batch_size, accuracy_operation, X_ph, Y_ph, keep_p_ph):
-    saver = tf.train.Saver()
+def evaluate(X,y,model,batch_size, accuracy_operation, X_ph, Y_ph, keep_p_ph, saver):
     total_eval = len(X)
     total_accuracy = 0 
     with tf.Session() as sess:
@@ -42,16 +41,13 @@ def evaluate(X,y,model,batch_size, accuracy_operation, X_ph, Y_ph, keep_p_ph):
             total_accuracy += (accuracy * len(x_batch))
     return (total_accuracy/total_eval)
 
-def initialize(model):
-    saver = tf.train.Saver()
-    with tf.Session() as sess:
+def initialize(model,saver):
         sess.run(tf.global_variables_initializer())
         saver.save(sess, model)
 
-def train(X,y,model,batch_size, keep_prob, training_operation, X_ph, Y_ph, keep_p_ph):
-    saver = tf.train.Saver()
+def train(X,y,model,batch_size, keep_prob, training_operation, X_ph, Y_ph, keep_p_ph, saver):
     if not os.path.isfile(model+'.meta'):
-        initialize(model)
+        initialize(model, saver)
         print('initialized.')
     with tf.Session() as sess: 
         saver.restore(sess,model)
@@ -64,8 +60,7 @@ def train(X,y,model,batch_size, keep_prob, training_operation, X_ph, Y_ph, keep_
             sess.run(training_operation, feed_dict = {X_ph:x_batch, Y_ph:y_batch, keep_p_ph:keep_prob})
         saver.save(sess, model)
 
-def predict(X, model, predict_operation):
-    saver = tf.train.Saver()
+def predict(X, model, predict_operation, saver):
     with tf.Session() as sess:
         saver.restore(sess,model)
         X = load_image(X)
