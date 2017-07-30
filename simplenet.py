@@ -20,7 +20,7 @@ def network(X, keep_probability):
     conv1 = tf.nn.max_pool(value = conv1, ksize = [1,3,3,1], 
                            strides = [1,2,2,1], padding = 'VALID')
     
-    # conv 2
+    # conv 2, dropout
     filter2_thickness = 32 
     
     conv2_w = tf.Variable(tf.truncated_normal(shape = (5,5,filter1_thickness,filter2_thickness), 
@@ -34,6 +34,7 @@ def network(X, keep_probability):
     conv2 = tf.nn.relu(conv2) 
     conv2 = tf.nn.avg_pool(value = conv2, ksize = [1,3,3,1], 
                            strides = [1,2,2,1], padding = 'VALID')
+    conv2 = tf.nn.dropout(conv2, keep_probability)
     
     # conv 3
     filter3_thickness =  64
@@ -50,9 +51,8 @@ def network(X, keep_probability):
     conv3 = tf.nn.relu(conv3) 
     conv3 = tf.nn.max_pool(value = conv3, ksize = [1,3,3,1], 
                            strides = [1,2,2,1], padding = 'VALID')
-    #conv3 = tf.nn.dropout(conv5, keep_probability)
 
-    # conv 4
+    # conv 4, dropout
     filter4_thickness = 64
 
     conv4_w = tf.Variable(tf.truncated_normal(shape = (5,5,filter3_thickness,
@@ -67,6 +67,7 @@ def network(X, keep_probability):
     conv4 = tf.nn.relu(conv4) 
     conv4 = tf.nn.avg_pool(value = conv4, ksize = [1,3,3,1], 
                            strides = [1,2,2,1], padding = 'VALID')
+    conv4 = tf.nn.dropout(conv4, keep_probability)
 
     # conv 5
     filter5_thickness = 128
@@ -81,7 +82,7 @@ def network(X, keep_probability):
     conv5 = tf.nn.bias_add(tf.nn.conv2d(input = conv4, filter = conv5_w, strides = [1,1,1,1], 
                         padding = 'VALID'),conv5_b)
     conv5 = tf.nn.relu(conv5) 
-    conv5 = tf.nn.max_pool(value = conv5, ksize = [1,3,3,1], 
+    conv5 = tf.nn.avg_pool(value = conv5, ksize = [1,3,3,1], 
                            strides = [1,2,2,1], padding = 'VALID')
 
 
@@ -109,6 +110,7 @@ def network(X, keep_probability):
     
     full2 = tf.add(tf.matmul(full1, full2_w), full2_b)
     full2 = tf.nn.relu(full2)
+    full2 = tf.nn.dropout(full2, keep_probability)
        
     # full out, final
     fullo_w = tf.Variable(tf.truncated_normal(shape = (full2_out,2), 

@@ -1,7 +1,10 @@
 import matplotlib.image as mimg
 import cv2
 import tensorflow as tf
+import os.path
+import numpy as np
 from tensorflow.contrib.layers import flatten
+from sklearn.utils import shuffle
 
 
 def grayscale(image):
@@ -14,43 +17,40 @@ def norm_gray(image):
     max_v = image.max()
     return low + (image - min_v) / (max_v - min_v) * (high - low)
 
-def preproc(data_set):
-    pro_data_set = []
-    for img in data_set:
-        img = grayscale(img)
-        img = norm_gray(img)
-        pro_data_set.append(img)
-    return pro_data_set
-
 def preproctf(data_set):
     pro_data_set = []
     for img in data_set:
         img = grayscale(img)
         img = norm_gray(img)
+        img = cv2.resize(img,(350, 230))
         pro_data_set.append(img)
-    pro_data_set = np.reshape(pro_data_set,(len(pro_data_set),32,32,1))
+    pro_data_set = np.reshape(pro_data_set,(len(pro_data_set),350,230,1))
     return pro_data_set
 
-def evaluate(X,y,model,batch_size, accuracy_operation):
+def evaluate(X,y,model,batch_size, accuracy_operation, X_ph, Y_ph, keep_p_ph):
+    saver = tf.train.Saver()
     total_eval = len(X)
     total_accuracy = 0 
     with tf.Session() as sess:
         saver.restore(sess,model)
         for offset in range(0, total_eval, batch_size):
             x_batch, y_batch = X[offset:offset + batch_size], y[offset:offset + batch_size]
+            x_batch = load_image(x_batch)
             x_batch = preproctf(x_batch)
             accuracy = sess.run(accuracy_operation, 
-                                feed_dict = {X_data:x_batch, y_data:y_batch, keep_p:1})
+                                feed_dict = {X_ph:x_batch, Y_ph:y_batch, keep_p_ph:1})
             total_accuracy += (accuracy * len(x_batch))
     return (total_accuracy/total_eval)
 
 def initialize(model):
+    saver = tf.train.Saver()
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         saver.save(sess, model)
 
-def train(X,y,model,batch_size, keep_prob, training_operation):
-    if not os.path.isfile('./model/checkpoint'):
+def train(X,y,model,batch_size, keep_prob, training_operation, X_ph, Y_ph, keep_p_ph):
+    saver = tf.train.Saver()
+    if not os.path.isfile(model+'.meta'):
         initialize(model)
         print('initialized.')
     with tf.Session() as sess: 
@@ -59,21 +59,24 @@ def train(X,y,model,batch_size, keep_prob, training_operation):
         X, y = shuffle(X, y)
         for offset in range(0,num_train,batch_size): 
             x_batch, y_batch = X[offset:offset + batch_size], y[offset:offset + batch_size]
+            x_batch = load_image(x_batch)
             x_batch = preproctf(x_batch)
-            sess.run(training_operation, feed_dict = {X_data:x_batch, y_data:y_batch, keep_p:keep_prob})
+            sess.run(training_operation, feed_dict = {X_ph:x_batch, Y_ph:y_batch, keep_p_ph:keep_prob})
         saver.save(sess, model)
 
-def predict(X, model):
+def predict(X, model, predict_operation):
+    saver = tf.train.Saver()
     with tf.Session() as sess:
         saver.restore(sess,model)
+        X = load_image(X)
         X = preproctf(X)
-        ret = sess.run(logits,feed_dict = {X_data:X, keep_p: 1})
+        ret = sess.run(predict_operation,feed_dict = {X_ph:X, keep_p: 1})
     return ret
 
 def construct_graph(network_builder, learning_rate): 
     """
     network_builder(X_placeholder, keep_prob_placeholder) returns the logit
-    input size: 64 x 64 x 1
+    input size: 350 x 230 x 1
     output size: 2
 
     learning_rate: float, learning rate
@@ -83,13 +86,13 @@ def construct_graph(network_builder, learning_rate):
             shape = (None, 350, 230, 1), 
             name = 'X_placeholder')
     Y_ph = tf.placeholder(dtype = tf.int32, 
-            shape = (None, 1), 
+            shape = (None), 
             name = 'Y_placeholder')
     keep_p_ph = tf.placeholder(dtype = tf.float32, 
             name = 'keep_prob_placeholder')
 
     # encode labels
-    y_encoded = tf.one_hot(Y_ph, 2)
+    y_encoded = tf.one_hot(indices = Y_ph, depth = 2)
 
     # network output
     logits = network_builder(X_ph, keep_p_ph)
@@ -101,13 +104,13 @@ def construct_graph(network_builder, learning_rate):
     training_operation = optimizer.minimize(loss_operation)
 
     # evaluation pipeline
-    isCorrect = tf.equal(tf.argmax(logits,1), tf.argmax(y_encoded,1))
+    isCorrect = tf.equal(tf.argmax(logits,1), tf.arg_max(y_encoded,1))
     accuracy_operation = tf.reduce_mean(tf.cast(isCorrect, tf.float32))
 
     # prediction pipeline 
     predict_operation = tf.nn.top_k(tf.nn.softmax(logits,2)) # softmax of logits
 
-    return training_operation, accuracy_operation, predict_operation
+    return X_ph, Y_ph, keep_p_ph, training_operation, accuracy_operation, predict_operation
 
 
 # ============== data loading ==============
@@ -131,5 +134,6 @@ def load_image(files_adr):
     for adr in files_adr:
         im = mimg.imread('./BreaKHis_data/' + adr)
         ret.append(im)
+    ret = np.array(ret)
     return ret
 
