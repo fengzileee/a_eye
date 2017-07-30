@@ -5,7 +5,7 @@ def network(X, keep_probability):
     mu = 0;
     sigma = 0.1; 
     
-    # layer 1, conv
+    # conv 1
     filter1_thickness = 32; 
     
     conv1_w = tf.Variable(tf.truncated_normal(shape = (5,5,1,filter1_thickness), 
@@ -20,7 +20,7 @@ def network(X, keep_probability):
     conv1 = tf.nn.max_pool(value = conv1, ksize = [1,3,3,1], 
                            strides = [1,2,2,1], padding = 'VALID')
     
-    # layer 2, conv 
+    # conv 2
     filter2_thickness = 32 
     
     conv2_w = tf.Variable(tf.truncated_normal(shape = (5,5,filter1_thickness,filter2_thickness), 
@@ -35,7 +35,7 @@ def network(X, keep_probability):
     conv2 = tf.nn.avg_pool(value = conv2, ksize = [1,3,3,1], 
                            strides = [1,2,2,1], padding = 'VALID')
     
-    # layer 3
+    # conv 3
     filter3_thickness =  64
     
     conv3_w = tf.Variable(tf.truncated_normal(shape = (5,5,filter2_thickness,
@@ -48,31 +48,87 @@ def network(X, keep_probability):
     conv3 = tf.nn.bias_add(tf.nn.conv2d(input = conv2, filter = conv3_w, strides = [1,1,1,1], 
                         padding = 'VALID'),conv3_b)
     conv3 = tf.nn.relu(conv3) 
-    conv3 = tf.nn.avg_pool(value = conv3, ksize = [1,3,3,1], 
+    conv3 = tf.nn.max_pool(value = conv3, ksize = [1,3,3,1], 
                            strides = [1,2,2,1], padding = 'VALID')
-    conv3 = flatten(conv3)
     #conv3 = tf.nn.dropout(conv5, keep_probability)
-    layer3_out = 576
 
-    # layer 4, full
-    layer4_out = 64
-    full4_w = tf.Variable(tf.truncated_normal(shape = (layer3_out,layer4_out), 
-                                             mean = mu, stddev = sigma), 
-                          name = 'full4_w')
-    full4_b = tf.Variable(tf.zeros(layer4_out), 
-                         name = 'full4_b')
+    # conv 4
+    filter4_thickness = 64
+
+    conv4_w = tf.Variable(tf.truncated_normal(shape = (5,5,filter3_thickness,
+        filter4_thickness), 
+                                             mean = mu, stddev = sigma),
+                         name = 'conv4_w')
+    conv4_b = tf.Variable(tf.zeros(filter4_thickness), 
+                         name = 'conv4_b')
     
-    full4 = tf.add(tf.matmul(conv3, full4_w), full4_b)
-    full4 = tf.nn.relu(full4)
+    conv4 = tf.nn.bias_add(tf.nn.conv2d(input = conv3, filter = conv4_w, strides = [1,1,1,1], 
+                        padding = 'VALID'),conv4_b)
+    conv4 = tf.nn.relu(conv4) 
+    conv4 = tf.nn.avg_pool(value = conv4, ksize = [1,3,3,1], 
+                           strides = [1,2,2,1], padding = 'VALID')
+
+    # conv 5
+    filter5_thickness = 128
+
+    conv5_w = tf.Variable(tf.truncated_normal(shape = (5,5,filter4_thickness,
+        filter5_thickness), 
+                                             mean = mu, stddev = sigma),
+                         name = 'conv5_w')
+    conv5_b = tf.Variable(tf.zeros(filter5_thickness), 
+                         name = 'conv5_b')
+    
+    conv5 = tf.nn.bias_add(tf.nn.conv2d(input = conv4, filter = conv5_w, strides = [1,1,1,1], 
+                        padding = 'VALID'),conv5_b)
+    conv5 = tf.nn.relu(conv5) 
+    conv5 = tf.nn.max_pool(value = conv5, ksize = [1,3,3,1], 
+                           strides = [1,2,2,1], padding = 'VALID')
+
+
+    conv_out = flatten(conv5)
+    conv_flatten_out = 1536
+
+    # full 1
+    full1_out = 512 
+    full1_w = tf.Variable(tf.truncated_normal(shape = (conv_flatten_out,full1_out), 
+                                             mean = mu, stddev = sigma), 
+                          name = 'full1_w')
+    full1_b = tf.Variable(tf.zeros(full1_out), 
+                         name = 'full1_b')
+    
+    full1 = tf.add(tf.matmul(conv_out, full1_w), full1_b)
+    full1 = tf.nn.relu(full1)
+ 
+    # full 2
+    full2_out = 64 
+    full2_w = tf.Variable(tf.truncated_normal(shape = (full1_out,full2_out), 
+                                             mean = mu, stddev = sigma), 
+                          name = 'full2_w')
+    full2_b = tf.Variable(tf.zeros(full2_out), 
+                         name = 'full2_b')
+    
+    full2 = tf.add(tf.matmul(full1, full2_w), full2_b)
+    full2 = tf.nn.relu(full2)
        
-    # layer 5, full, final
-    full5_w = tf.Variable(tf.truncated_normal(shape = (layer4_out,2), 
+    # full out, final
+    fullo_w = tf.Variable(tf.truncated_normal(shape = (full2_out,2), 
                                              mean = mu, stddev = sigma), 
-                          name = 'full5_w')
-    full5_b = tf.Variable(tf.zeros(2), 
-                         name = 'full5_b')
+                          name = 'fullo_w')
+    fullo_b = tf.Variable(tf.zeros(2), 
+                         name = 'fullo_b')
     
-    full5 = tf.add(tf.matmul(full4, full5_w), full5_b)
-    logits = tf.nn.relu(full5)
+    fullo = tf.add(tf.matmul(full2, fullo_w), fullo_b)
+    logits = tf.nn.relu(fullo)
+    
+  
+    # full 2, final
+    full2_w = tf.Variable(tf.truncated_normal(shape = (full1_out,2), 
+                                             mean = mu, stddev = sigma), 
+                          name = 'full2_w')
+    full2_b = tf.Variable(tf.zeros(2), 
+                         name = 'full2_b')
+    
+    full2 = tf.add(tf.matmul(full1, full2_w), full2_b)
+    logits = tf.nn.relu(full2)
     
     return logits

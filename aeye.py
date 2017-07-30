@@ -80,7 +80,7 @@ def construct_graph(network_builder, learning_rate):
     """
     # placeholders
     X_ph = tf.placeholder(dtype = tf.float32,
-            shape = (None, 64, 64, 1), 
+            shape = (None, 350, 230, 1), 
             name = 'X_placeholder')
     Y_ph = tf.placeholder(dtype = tf.int32, 
             shape = (None, 1), 
