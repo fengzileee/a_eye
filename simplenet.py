@@ -116,9 +116,8 @@ def network(X, keep_probability):
         # full out, final
         
         fullo = tf.add(tf.matmul(full1, fullo_w), fullo_b)
-        patch_logits = tf.nn.softmax(fullo)
 
-        return patch_logits
+        return fullo
         
     # process patch
     patch_logits = tf.map_fn(forward, patches_t)
