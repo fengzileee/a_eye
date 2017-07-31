@@ -46,7 +46,7 @@ def initialize(model,saver):
         sess.run(tf.global_variables_initializer())
         saver.save(sess, model)
 
-def train(X,y,model,batch_size, keep_prob, training_operation, X_ph, Y_ph, keep_p_ph, saver):
+def train(X,y,model,batch_size, keep_prob, training_operation, X_ph, Y_ph, keep_p_ph, saver, out):
     if not os.path.isfile(model+'.meta'):
         initialize(model, saver)
         print('initialized.')
@@ -59,7 +59,9 @@ def train(X,y,model,batch_size, keep_prob, training_operation, X_ph, Y_ph, keep_
             x_batch = load_image(x_batch)
             x_batch = preproctf(x_batch)
             sess.run(training_operation, feed_dict = {X_ph:x_batch, Y_ph:y_batch, keep_p_ph:keep_prob})
+            ret = sess.run(out, feed_dict = {X_ph:x_batch, Y_ph:y_batch, keep_p_ph:keep_prob})
         saver.save(sess, model)
+    return ret
 
 def predict(X, model, predict_operation, saver):
     with tf.Session() as sess:
@@ -106,7 +108,7 @@ def construct_graph(network_builder, learning_rate):
     # prediction pipeline 
     predict_operation = tf.nn.top_k(tf.nn.softmax(logits,2)) # softmax of logits
 
-    return X_ph, Y_ph, keep_p_ph, training_operation, accuracy_operation, predict_operation
+    return X_ph, Y_ph, keep_p_ph, training_operation, accuracy_operation, predict_operation, loss_operation
 
 
 # ============== data loading ==============
