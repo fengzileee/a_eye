@@ -27,19 +27,26 @@ def preproctf(data_set):
     pro_data_set = np.reshape(pro_data_set,(len(pro_data_set),350,230,1))
     return pro_data_set
 
-def evaluate(X,y,model,batch_size, accuracy_operation, X_ph, Y_ph, keep_p_ph, saver):
+print('',end="", file=open('logits.out', 'w'))
+fout_logits = open('logits.out', 'a')
+def evaluate(X,y,model,batch_size, accuracy_operation, out, X_ph, Y_ph, keep_p_ph, saver):
+    print('===================== val starts ========================', file=fout_logits)
     total_eval = len(X)
     total_accuracy = 0 
+    total_loss = 0 
     with tf.Session() as sess:
         saver.restore(sess,model)
         for offset in range(0, total_eval, batch_size):
             x_batch, y_batch = X[offset:offset + batch_size], y[offset:offset + batch_size]
             x_batch = load_image(x_batch)
             x_batch = preproctf(x_batch)
-            accuracy = sess.run(accuracy_operation, 
+            [accuracy, loss, logits, label] = sess.run([accuracy_operation, out[0], out[1], out[2]], 
                                 feed_dict = {X_ph:x_batch, Y_ph:y_batch, keep_p_ph:1})
             total_accuracy += (accuracy * len(x_batch))
-    return (total_accuracy/total_eval)
+            total_loss += (loss * len(x_batch))
+            print(logits, label, file = fout_logits)
+    print('===================== val ends ========================', file=fout_logits)
+    return [(total_accuracy/total_eval), (total_loss/total_eval)]
 
 def initialize(model,saver):
     with tf.Session() as sess:
@@ -47,6 +54,7 @@ def initialize(model,saver):
         saver.save(sess, model)
 
 def train(X,y,model,batch_size, keep_prob, training_operation, X_ph, Y_ph, keep_p_ph, saver, out):
+    print('===================== train starts ========================', file=fout_logits)
     if not os.path.isfile(model+'.meta'):
         initialize(model, saver)
         print('initialized.')
@@ -58,10 +66,13 @@ def train(X,y,model,batch_size, keep_prob, training_operation, X_ph, Y_ph, keep_
             x_batch, y_batch = X[offset:offset + batch_size], y[offset:offset + batch_size]
             x_batch = load_image(x_batch)
             x_batch = preproctf(x_batch)
-            sess.run(training_operation, feed_dict = {X_ph:x_batch, Y_ph:y_batch, keep_p_ph:keep_prob})
-            ret = sess.run(out, feed_dict = {X_ph:x_batch, Y_ph:y_batch, keep_p_ph:keep_prob})
+            ret = sess.run([out[0], out[1], out[2], training_operation], 
+                    feed_dict = {X_ph:x_batch, Y_ph:y_batch, keep_p_ph:keep_prob})
+            print(ret[0], ret[1], ret[2], end='\r')
+            print(ret[0], ret[1], ret[2], file=fout_logits)
         saver.save(sess, model)
-    return ret
+    print('===================== train ends ========================', file=fout_logits)
+    return ret[0]
 
 def predict(X, model, predict_operation, saver):
     with tf.Session() as sess:
@@ -94,6 +105,7 @@ def construct_graph(network_builder, learning_rate):
 
     # network output
     logits = network_builder(X_ph, keep_p_ph)
+    logits_sm = tf.nn.softmax(logits)
 
     # training pipeline
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits = logits, labels = y_encoded)
@@ -108,7 +120,8 @@ def construct_graph(network_builder, learning_rate):
     # prediction pipeline 
     predict_operation = tf.nn.top_k(tf.nn.softmax(logits,2)) # softmax of logits
 
-    return X_ph, Y_ph, keep_p_ph, training_operation, accuracy_operation, predict_operation, loss_operation
+    return X_ph, Y_ph, keep_p_ph, training_operation, \
+        accuracy_operation, predict_operation, [loss_operation, logits_sm, y_encoded]
 
 
 # ============== data loading ==============
