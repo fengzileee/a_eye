@@ -68,8 +68,10 @@ def train(X,y,model,batch_size, keep_prob, training_operation, X_ph, Y_ph, keep_
             x_batch = preproctf(x_batch)
             ret = sess.run([out[0], out[1], out[2], training_operation], 
                     feed_dict = {X_ph:x_batch, Y_ph:y_batch, keep_p_ph:keep_prob})
-            print(ret[0], ret[1], ret[2], end='\r')
-            print(ret[0], ret[1], ret[2], file=fout_logits)
+            print(ret[0], ret[1][0,:], ret[2][0,:], end='\r')
+            print('Batch mean loss: {}'.format(ret[0]),'\n', 
+                    'Softmax:\n', ret[1],'\n', 
+                    'One-hot labels:\n', ret[2], file=fout_logits)
         saver.save(sess, model)
     print('===================== train ends ========================', file=fout_logits)
     return ret[0]

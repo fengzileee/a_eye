@@ -1,14 +1,15 @@
 import simplenet
 from aeye import *
 
-model_name = 'model_trial.ckpt'
-model_dir = './model_trial'
+model_name = 'model_cnn.ckpt'
+model_dir = './model'
 model_file = model_dir + '/' + model_name
 
 print("construct graph")
 X_ph, Y_ph, keep_p_ph, training_operation, accuracy_operation,\
         predict_operation, out\
-        = construct_graph(network_builder = simplenet.network, learning_rate = 0.000001)
+        = construct_graph(network_builder = simplenet.conv_net, 
+                learning_rate = 0.000001)
 saver = tf.train.Saver()
 print("fnished construction of graph")
 
@@ -27,19 +28,23 @@ X_test_adr, Y_test = parse_txt(test_data)
 print("finished parsing data")
 
 print("start training")
-EPOCH_NO = 100
-BATCH_SIZE = 1
+EPOCH_NO = 20
+BATCH_SIZE = 16
 
 for epoch in range(EPOCH_NO):
     print('========= Epoch {} started ... ========='.format(epoch + 1))
     print('========= Epoch {} started ... ========='.format(epoch + 1), file = fout)
     train(X = X_train_adr, y = Y_train, model = model_file,
-            batch_size = BATCH_SIZE, keep_prob = 1, training_operation = training_operation, 
-            X_ph = X_ph, Y_ph = Y_ph, keep_p_ph = keep_p_ph, saver = saver, out = out)
+            batch_size = BATCH_SIZE, keep_prob = 1, 
+            training_operation = training_operation, 
+            X_ph = X_ph, Y_ph = Y_ph, keep_p_ph = keep_p_ph, 
+            saver = saver, out = out)
 
-    [accuracy, loss] = evaluate(X = X_val_adr, y = Y_val, model = model_file,
-            batch_size = BATCH_SIZE, accuracy_operation = accuracy_operation, out = out,
-            X_ph = X_ph, Y_ph = Y_ph, keep_p_ph = keep_p_ph, saver = saver)
+    [accuracy, loss] = evaluate(X = X_val_adr, y = Y_val, 
+            model = model_file, batch_size = BATCH_SIZE, 
+            accuracy_operation = accuracy_operation, 
+            out = out, X_ph = X_ph, Y_ph = Y_ph, 
+            keep_p_ph = keep_p_ph, saver = saver)
 
     print('Epoch {}/{}, Validation accuracy: {:.3f}'.format(epoch+1, EPOCH_NO, accuracy))
     print('Epoch {}/{}, Loss: {:.6f}'.format(epoch+1, EPOCH_NO, loss))
