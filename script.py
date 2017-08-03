@@ -29,7 +29,7 @@ print("finished parsing data")
 
 print("start training")
 EPOCH_NO = 20
-BATCH_SIZE = 16
+BATCH_SIZE = 1
 
 for epoch in range(EPOCH_NO):
     print('========= Epoch {} started ... ========='.format(epoch + 1))
