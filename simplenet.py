@@ -179,7 +179,7 @@ def conv_net(X, keep_prob):
             512, 256, 512, 1024, 512, 
             1024, 512, 1024, 512, 1024, 
             512, 1024, 512, 1024, 512, 
-            1024, 1000] 
+            1024, 2] 
 
     conv_filter_size = [None, 
             3, 3, 3, 1, 3,
@@ -191,7 +191,7 @@ def conv_net(X, keep_prob):
 
     pool_index = [1, 2, 5, 8, 13, 19, 26]
 
-    full_sizes = [1000, 64, 2, 2]
+    full_sizes = [1000, 64, 2, 1]
 
     prev = conv_unit(index = 1, input = X, 
             filter_size = conv_filter_size[1], 
@@ -209,12 +209,9 @@ def conv_net(X, keep_prob):
                 isPool = i in pool_index)
 
     prev = tf.nn.avg_pool(value = prev, 
-            ksize = [1, 2, 2, 1], 
+            ksize = [1, 3, 2, 1], 
             strides = [1, 1, 1, 1],
             padding = 'VALID')
-
-    prev = tf.reduce_mean(input_tensor = prev, 
-            axis = 3)
 
     prev = flatten(prev)
 
