@@ -1,60 +1,7 @@
 ========= Epoch 1 started ... =========
-Epoch 1/20, Validation accuracy: 0.657
-Epoch 1/20, Loss: 5.361041
+Epoch 1/3, Validation accuracy: 0.709
+Epoch 1/3, Loss: 0.616970
 ========= Epoch 2 started ... =========
-Epoch 2/20, Validation accuracy: 0.681
-Epoch 2/20, Loss: 5.925998
+Epoch 2/3, Validation accuracy: 0.709
+Epoch 2/3, Loss: 0.633772
 ========= Epoch 3 started ... =========
-Epoch 3/20, Validation accuracy: 0.591
-Epoch 3/20, Loss: 5.762334
-========= Epoch 4 started ... =========
-Epoch 4/20, Validation accuracy: 0.606
-Epoch 4/20, Loss: 5.397790
-========= Epoch 5 started ... =========
-Epoch 5/20, Validation accuracy: 0.673
-Epoch 5/20, Loss: 5.652894
-========= Epoch 6 started ... =========
-Epoch 6/20, Validation accuracy: 0.665
-Epoch 6/20, Loss: 5.297355
-========= Epoch 7 started ... =========
-Epoch 7/20, Validation accuracy: 0.630
-Epoch 7/20, Loss: 5.235661
-========= Epoch 8 started ... =========
-Epoch 8/20, Validation accuracy: 0.630
-Epoch 8/20, Loss: 5.147510
-========= Epoch 9 started ... =========
-Epoch 9/20, Validation accuracy: 0.626
-Epoch 9/20, Loss: 5.107948
-========= Epoch 10 started ... =========
-Epoch 10/20, Validation accuracy: 0.646
-Epoch 10/20, Loss: 4.916392
-========= Epoch 11 started ... =========
-Epoch 11/20, Validation accuracy: 0.654
-Epoch 11/20, Loss: 5.341514
-========= Epoch 12 started ... =========
-Epoch 12/20, Validation accuracy: 0.575
-Epoch 12/20, Loss: 5.815955
-========= Epoch 13 started ... =========
-Epoch 13/20, Validation accuracy: 0.693
-Epoch 13/20, Loss: 6.110773
-========= Epoch 14 started ... =========
-Epoch 14/20, Validation accuracy: 0.669
-Epoch 14/20, Loss: 5.028116
-========= Epoch 15 started ... =========
-Epoch 15/20, Validation accuracy: 0.626
-Epoch 15/20, Loss: 4.972125
-========= Epoch 16 started ... =========
-Epoch 16/20, Validation accuracy: 0.610
-Epoch 16/20, Loss: 5.064415
-========= Epoch 17 started ... =========
-Epoch 17/20, Validation accuracy: 0.665
-Epoch 17/20, Loss: 5.017203
-========= Epoch 18 started ... =========
-Epoch 18/20, Validation accuracy: 0.697
-Epoch 18/20, Loss: 5.933211
-========= Epoch 19 started ... =========
-Epoch 19/20, Validation accuracy: 0.575
-Epoch 19/20, Loss: 6.059211
-========= Epoch 20 started ... =========
-Epoch 20/20, Validation accuracy: 0.657
-Epoch 20/20, Loss: 5.098582

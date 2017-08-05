@@ -9,7 +9,7 @@ print("construct graph")
 X_ph, Y_ph, keep_p_ph, training_operation, accuracy_operation,\
         predict_operation, out\
         = construct_graph(network_builder = simplenet.conv_net, 
-                learning_rate = 0.000001)
+                learning_rate = 0.0001)
 saver = tf.train.Saver()
 print("fnished construction of graph")
 
@@ -29,7 +29,7 @@ print("finished parsing data")
 
 print("start training")
 EPOCH_NO = 20
-BATCH_SIZE = 1
+BATCH_SIZE = 32
 
 for epoch in range(EPOCH_NO):
     print('========= Epoch {} started ... ========='.format(epoch + 1))

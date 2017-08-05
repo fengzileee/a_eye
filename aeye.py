@@ -70,7 +70,7 @@ def train(X,y,model,batch_size, keep_prob, training_operation, X_ph, Y_ph, keep_
                     feed_dict = {X_ph:x_batch, Y_ph:y_batch, keep_p_ph:keep_prob})
             print(ret[0], ret[1][0,:], ret[2][0,:], end='\r')
             print('Batch mean loss: {}'.format(ret[0]),'\n', 
-                    'Softmax:\n', ret[1],'\n', 
+                    'Logits:\n', ret[1],'\n', 
                     'One-hot labels:\n', ret[2], file=fout_logits)
         saver.save(sess, model)
     print('===================== train ends ========================', file=fout_logits)
@@ -123,7 +123,7 @@ def construct_graph(network_builder, learning_rate):
     predict_operation = tf.nn.top_k(tf.nn.softmax(logits,2)) # softmax of logits
 
     return X_ph, Y_ph, keep_p_ph, training_operation, \
-        accuracy_operation, predict_operation, [loss_operation, logits_sm, y_encoded]
+        accuracy_operation, predict_operation, [loss_operation, logits, y_encoded]
 
 
 # ============== data loading ==============
