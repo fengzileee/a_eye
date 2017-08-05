@@ -177,21 +177,15 @@ def conv_net(X, keep_prob):
             32, 64, 128, 64, 128, 
             256, 128, 256, 512, 256, 
             512, 256, 512, 1024, 512, 
-            1024, 512, 1024, 512, 1024, 
-            512, 1024, 512, 1024, 512, 
-            1024, 2] 
+            1024, 512, 1024, 2] 
 
     conv_filter_size = [None, 
             3, 3, 3, 1, 3,
             3, 1, 3, 3, 1,
             3, 1, 3, 3, 1,
-            3, 1, 3, 1, 3,
-            1, 3, 1, 3, 1, 
-            3, 1]
+            3, 1, 3, 1]
 
-    pool_index = [1, 2, 5, 8, 13, 19, 26]
-
-    full_sizes = [1000, 64, 2, 1]
+    pool_index = [1, 2, 5, 8]
 
     prev = conv_unit(index = 1, input = X, 
             filter_size = conv_filter_size[1], 
@@ -200,25 +194,16 @@ def conv_net(X, keep_prob):
             out_depth = conv_out_depth[1], 
             isPool = True)
 
-    for i in range (2, 28):
+    for i in range (2, 20):
         prev = conv_unit(index = i, input = prev, 
                 filter_size = conv_filter_size[i], 
                 pool_size = 2, 
                 in_depth = conv_out_depth[i-1], 
                 out_depth = conv_out_depth[i], 
                 isPool = i in pool_index)
-
-    prev = tf.nn.avg_pool(value = prev, 
-            ksize = [1, 3, 2, 1], 
-            strides = [1, 1, 1, 1],
-            padding = 'VALID')
-
-    prev = flatten(prev)
-
-    #for i in range(1,3):
-    #    prev = full_unit(index = i, input = prev, 
-    #            in_size = full_sizes[i-1], 
-    #            out_size = full_sizes[i])
+        
+    prev = tf.reduce_mean(prev, 1)
+    prev = tf.reduce_mean(prev, 1)
 
     return prev
 
