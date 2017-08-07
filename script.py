@@ -21,7 +21,7 @@ for split_index in split_indeces:
     model_file = model_dir + '/' + model_name
     
     print("parse data")
-    output_file_name = 'split' + str(split_index) + '.out'
+    output_file_name = './output/split' + str(split_index) + '.out'
     print('', end="", file = open(output_file_name, 'w'))
     fout = open(output_file_name, 'a')
     
