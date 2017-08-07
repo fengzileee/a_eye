@@ -78,13 +78,12 @@ def train(X,y,model,batch_size, keep_prob, training_operation, X_ph, Y_ph, keep_
     print('===================== train ends ========================', file=fout_logits)
     return ret[0]
 
-def predict(X, model, predict_operation, saver):
-    with tf.Session() as sess:
-        saver.restore(sess,model)
-        X = load_image(X)
-        X = preproctf(X)
-        ret = sess.run(predict_operation,feed_dict = {X_ph:X, keep_p: 1})
-    return ret
+def predict(X, predict_operation, X_ph, keep_p_ph, sess):
+    X = load_image_single(X)
+    ret = sess.run(predict_operation,
+            feed_dict = {X_ph:X, keep_p_ph: 1})
+    result = {ret[1][0][0]: ret[0][0][0],ret[1][0][1]: ret[0][0][1]}
+    return result
 
 def construct_graph(network_builder, learning_rate): 
     """
@@ -124,7 +123,7 @@ def construct_graph(network_builder, learning_rate):
     accuracy_operation = tf.reduce_mean(tf.cast(isCorrect, tf.float32))
 
     # prediction pipeline 
-    predict_operation = tf.nn.top_k(tf.nn.softmax(logits,2)) # softmax of logits
+    predict_operation = tf.nn.top_k(tf.nn.softmax(logits),2) # softmax of logits
 
     return X_ph, Y_ph, keep_p_ph, training_operation, \
         accuracy_operation, predict_operation, [loss_operation, logits_sm, y_encoded]
@@ -154,3 +153,13 @@ def load_image(files_adr):
     #ret = np.array(ret)
     return ret
 
+def load_image_single(adr):
+    """ 
+    Takes a list of addresses given in the text file in split directory
+    Return a list of numpy arrays, each representing one imega
+    """
+    im = mimg.imread(adr)
+    im = cv2.resize(im,(230, 350))
+    im = np.reshape(im,(1,230,350,3))
+    #ret = np.array(ret)
+    return im
