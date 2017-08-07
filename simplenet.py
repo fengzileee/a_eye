@@ -136,10 +136,13 @@ def conv_net(X, keep_prob):
             leakage = 0.1, isPool = False):
         conv_w = tf.Variable(tf.truncated_normal(
                 shape = (filter_size, filter_size, in_depth, out_depth), 
-                mean = 0, stddev = 0.1), 
+                mean = 0, stddev = 0.3), 
             name = 'conv' + str(index) + '_w')
-        conv_b = tf.Variable(-0.4 * tf.ones(out_depth), 
+        conv_b = tf.Variable(-0.1 * tf.ones(out_depth), 
             name = 'conv' + str(index) + '_b')
+
+        input = tf.contrib.layers.batch_norm(inputs = input, 
+            scale = True)
 
         conv_out = tf.nn.conv2d(input = input, 
                 filter = conv_w, strides = [1,1,1,1], 
@@ -173,24 +176,25 @@ def conv_net(X, keep_prob):
 
         return output
 
-    conv_out_depth = [None, 
+    conv_out_depth = [3, 
             32, 64, 128, 64, 128, 
             256, 128, 256, 512, 256, 
             512, 256, 512, 1024, 512, 
-            1024, 512, 1024, 2] 
+            1024, 512, 1024, 2]
 
     conv_filter_size = [None, 
             3, 3, 3, 1, 3,
             3, 1, 3, 3, 1,
             3, 1, 3, 3, 1,
-            3, 1, 3, 1]
+            3, 1, 3, 1, 3, 
+	    1, 1]
 
     pool_index = [1, 2, 5, 8]
 
     prev = conv_unit(index = 1, input = X, 
             filter_size = conv_filter_size[1], 
             pool_size = 2, 
-            in_depth = 1, 
+            in_depth = conv_out_depth[0], 
             out_depth = conv_out_depth[1], 
             isPool = True)
 
@@ -198,6 +202,7 @@ def conv_net(X, keep_prob):
         prev = conv_unit(index = i, input = prev, 
                 filter_size = conv_filter_size[i], 
                 pool_size = 2, 
+		leakage = 0.1,
                 in_depth = conv_out_depth[i-1], 
                 out_depth = conv_out_depth[i], 
                 isPool = i in pool_index)

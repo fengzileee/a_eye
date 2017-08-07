@@ -11,8 +11,8 @@ def grayscale(image):
     return cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 
 def norm_gray(image):
-    low = 0.1
-    high = 0.9 
+    low = -0.5
+    high = 0.5 
     min_v = image.min()
     max_v = image.max()
     return low + (image - min_v) / (max_v - min_v) * (high - low)
@@ -20,11 +20,11 @@ def norm_gray(image):
 def preproctf(data_set):
     pro_data_set = []
     for img in data_set:
-        img = grayscale(img)
-        img = norm_gray(img)
-        img = cv2.resize(img,(350, 230))
+        #img = grayscale(img)
+        #img = norm_gray(img)
+        img = cv2.resize(img,(230, 350))
         pro_data_set.append(img)
-    pro_data_set = np.reshape(pro_data_set,(len(pro_data_set),350,230,1))
+    pro_data_set = np.reshape(pro_data_set,(len(pro_data_set),230,350,3))
     return pro_data_set
 
 print('',end="", file=open('logits.out', 'w'))
@@ -67,7 +67,9 @@ def train(X,y,model,batch_size, keep_prob, training_operation, X_ph, Y_ph, keep_
             x_batch = load_image(x_batch)
             x_batch = preproctf(x_batch)
             ret = sess.run([out[0], out[1], out[2], training_operation], 
-                    feed_dict = {X_ph:x_batch, Y_ph:y_batch, keep_p_ph:keep_prob})
+                    feed_dict = {X_ph:x_batch, 
+			Y_ph:y_batch, 
+			keep_p_ph:keep_prob})
             print(ret[0], ret[1][0,:], ret[2][0,:], end='\r')
             print('Batch mean loss: {}'.format(ret[0]),'\n', 
                     'Logits:\n', ret[1],'\n', 
@@ -94,7 +96,7 @@ def construct_graph(network_builder, learning_rate):
     """
     # placeholders
     X_ph = tf.placeholder(dtype = tf.float32,
-            shape = (None, 350, 230, 1), 
+            shape = (None, 230, 350, 3), 
             name = 'X_placeholder')
     Y_ph = tf.placeholder(dtype = tf.int32, 
             shape = (None), 
@@ -110,8 +112,10 @@ def construct_graph(network_builder, learning_rate):
     logits_sm = tf.nn.softmax(logits)
 
     # training pipeline
-    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits = logits, labels = y_encoded)
-    loss_operation = tf.reduce_mean(cross_entropy)
+    #cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits = logits, labels = y_encoded)
+    #loss_operation = tf.reduce_mean(cross_entropy)
+    sum_squared_error = tf.squared_difference(logits_sm, y_encoded)
+    loss_operation = tf.reduce_mean(sum_squared_error)
     optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate)
     training_operation = optimizer.minimize(loss_operation)
 
@@ -123,7 +127,7 @@ def construct_graph(network_builder, learning_rate):
     predict_operation = tf.nn.top_k(tf.nn.softmax(logits,2)) # softmax of logits
 
     return X_ph, Y_ph, keep_p_ph, training_operation, \
-        accuracy_operation, predict_operation, [loss_operation, logits, y_encoded]
+        accuracy_operation, predict_operation, [loss_operation, logits_sm, y_encoded]
 
 
 # ============== data loading ==============
@@ -134,7 +138,7 @@ def parse_txt(filename):
         for line in f:
             line = line.rstrip('\n')
             splited = line.split(' ')
-            X_adr.append(splited[0])
+            X_adr.append('./BreaKHis_data/' + splited[0])
             Y.append(splited[1])
     return X_adr, Y
 
@@ -145,8 +149,8 @@ def load_image(files_adr):
     """
     ret = []
     for adr in files_adr:
-        im = mimg.imread('./BreaKHis_data/' + adr)
+        im = mimg.imread(adr)
         ret.append(im)
-    ret = np.array(ret)
+    #ret = np.array(ret)
     return ret
 
