@@ -159,7 +159,8 @@ def load_image_single(adr):
     Return a list of numpy arrays, each representing one imega
     """
     im = mimg.imread(adr)
-    im = cv2.resize(im,(230, 350))
+    im = cv2.resize(src = im,dsize = (230, 350), 
+            fx=0, fy=0)
     im = np.reshape(im,(1,230,350,3))
     #ret = np.array(ret)
     return im
