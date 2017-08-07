@@ -127,6 +127,93 @@ def network(X, keep_probability):
    
     return logits
 
+def conv_net(X, keep_prob):
+    def lrelu(x, a):
+        return tf.nn.relu(x) - a * tf.nn.relu(-x)
+
+    def conv_unit(index, input, filter_size,  
+            pool_size, in_depth, out_depth, padding = 'SAME', 
+            leakage = 0.1, isPool = False):
+        conv_w = tf.Variable(tf.truncated_normal(
+                shape = (filter_size, filter_size, in_depth, out_depth), 
+                mean = 0, stddev = 0.3), 
+            name = 'conv' + str(index) + '_w')
+        conv_b = tf.Variable(-0.1 * tf.ones(out_depth), 
+            name = 'conv' + str(index) + '_b')
+
+        input = tf.contrib.layers.batch_norm(inputs = input, 
+            scale = True)
+
+        conv_out = tf.nn.conv2d(input = input, 
+                filter = conv_w, strides = [1,1,1,1], 
+                padding = padding) 
+        conv_out = tf.nn.bias_add(conv_out, conv_b)
+        conv_out = lrelu(conv_out, leakage)
+
+        if isPool:
+            pool_out = tf.nn.max_pool(value = conv_out, 
+                    ksize = [1, pool_size, pool_size, 1], 
+                    strides = [1, pool_size, pool_size, 1], 
+                    padding = padding) 
+            output = tf.nn.dropout(pool_out, keep_prob)
+        else:
+            output = tf.nn.dropout(conv_out, keep_prob)
+
+        return output
+
+    def full_unit(index, input, in_size, out_size, 
+            leakage = 0.3):
+        full_w = tf.Variable(tf.truncated_normal(shape = (in_size, out_size), 
+                mean = 0, stddev = 0.1), 
+                name = 'full'+str(index) + '_w')
+        full_b = tf.Variable(tf.zeros(out_size), 
+            name = 'full' + str(index) + '_b')
+
+        full_out = tf.add(tf.matmul(input, full_w), full_b) 
+        full_out = lrelu(full_out, leakage) 
+
+        output = tf.nn.dropout(full_out, keep_prob)
+
+        return output
+
+    conv_out_depth = [3, 
+            32, 64, 128, 64, 128, 
+            256, 128, 256, 512, 256, 
+            512, 256, 512, 1024, 512, 
+            1024, 512, 1024, 2]
+
+    conv_filter_size = [None, 
+            3, 3, 3, 1, 3,
+            3, 1, 3, 3, 1,
+            3, 1, 3, 3, 1,
+            3, 1, 3, 1, 3, 
+	    1, 1]
+
+    pool_index = [1, 2, 5, 8]
+
+    prev = conv_unit(index = 1, input = X, 
+            filter_size = conv_filter_size[1], 
+            pool_size = 2, 
+            in_depth = conv_out_depth[0], 
+            out_depth = conv_out_depth[1], 
+            isPool = True)
+
+    for i in range (2, 20):
+        prev = conv_unit(index = i, input = prev, 
+                filter_size = conv_filter_size[i], 
+                pool_size = 2, 
+		leakage = 0.1,
+                in_depth = conv_out_depth[i-1], 
+                out_depth = conv_out_depth[i], 
+                isPool = i in pool_index)
+        
+    prev = tf.reduce_mean(prev, 1)
+    prev = tf.reduce_mean(prev, 1)
+
+    return prev
+
+
+
 def stupid_net(X, keep_prob):
     mu = 0;
     sigma = 0.1; 

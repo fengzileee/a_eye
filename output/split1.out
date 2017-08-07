@@ -1,0 +1,30 @@
+========= Epoch 1 started ... =========
+Epoch 1/10, Validation accuracy: 0.702
+Epoch 1/10, Loss: 0.217636
+========= Epoch 2 started ... =========
+Epoch 2/10, Validation accuracy: 0.702
+Epoch 2/10, Loss: 0.218870
+========= Epoch 3 started ... =========
+Epoch 3/10, Validation accuracy: 0.702
+Epoch 3/10, Loss: 0.218726
+========= Epoch 4 started ... =========
+Epoch 4/10, Validation accuracy: 0.702
+Epoch 4/10, Loss: 0.218215
+========= Epoch 5 started ... =========
+Epoch 5/10, Validation accuracy: 0.702
+Epoch 5/10, Loss: 0.217717
+========= Epoch 6 started ... =========
+Epoch 6/10, Validation accuracy: 0.702
+Epoch 6/10, Loss: 0.217076
+========= Epoch 7 started ... =========
+Epoch 7/10, Validation accuracy: 0.702
+Epoch 7/10, Loss: 0.217475
+========= Epoch 8 started ... =========
+Epoch 8/10, Validation accuracy: 0.702
+Epoch 8/10, Loss: 0.218215
+========= Epoch 9 started ... =========
+Epoch 9/10, Validation accuracy: 0.702
+Epoch 9/10, Loss: 0.218423
+========= Epoch 10 started ... =========
+Epoch 10/10, Validation accuracy: 0.702
+Epoch 10/10, Loss: 0.219049
